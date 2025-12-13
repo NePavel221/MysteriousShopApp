@@ -4,6 +4,7 @@ import 'react-image-crop/dist/ReactCrop.css'
 import { getProducts, getCategories, updateProduct, createProduct, deleteProduct, uploadProductImage, deleteProductImage, getProductAttributes, updateProductAttributes } from '../api'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const BASE_URL = import.meta.env.PROD ? '' : 'http://localhost:3001'
 
 const NICOTINE_OPTIONS = ['', '20 мг', '40 мг', '50 мг']
 
@@ -107,11 +108,18 @@ export default function ProductsPage() {
         reader.onload = () => {
             setImageSrc(reader.result as string)
             setCropModalOpen(true)
-            setCrop({ unit: '%', width: 80, height: 80, x: 10, y: 10 })
+            // Выделяем всё изображение по умолчанию
+            setCrop({ unit: '%', width: 100, height: 100, x: 0, y: 0 })
         }
         reader.readAsDataURL(file)
         e.target.value = ''
     }
+
+    // Автоматически устанавливаем completedCrop при загрузке изображения
+    const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+        const { width, height } = e.currentTarget
+        setCompletedCrop({ x: 0, y: 0, width, height, unit: 'px' })
+    }, [])
 
     // Создание обрезанного изображения
     const getCroppedImg = useCallback(async (): Promise<Blob | null> => {
@@ -170,7 +178,7 @@ export default function ProductsPage() {
 
     const getImageUrl = (url: string) => {
         if (!url) return 'https://placehold.co/60x60/eee/999?text=Нет'
-        if (url.startsWith('/uploads')) return `${API_URL}${url}`
+        if (url.startsWith('/uploads')) return `${BASE_URL}${url}`
         return url
     }
 
@@ -327,7 +335,7 @@ export default function ProductsPage() {
                                 onComplete={c => setCompletedCrop(c)}
                                 aspect={1}
                             >
-                                <img ref={imgRef} src={imageSrc} alt="Crop" style={{ maxWidth: '100%', maxHeight: '60vh' }} />
+                                <img ref={imgRef} src={imageSrc} alt="Crop" style={{ maxWidth: '100%', maxHeight: '60vh' }} onLoad={onImageLoad} />
                             </ReactCrop>
                         </div>
 
