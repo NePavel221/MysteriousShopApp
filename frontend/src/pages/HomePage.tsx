@@ -71,6 +71,15 @@ const CategoryIcons: Record<string, JSX.Element> = {
     ),
 }
 
+// Варианты дизайна
+const STYLE_VARIANTS = [
+    { id: 1, name: 'Компактный', class: 'style-compact' },
+    { id: 2, name: 'Просторный', class: 'style-spacious' },
+    { id: 3, name: 'Без заголовка', class: 'style-no-header' },
+    { id: 4, name: 'Крупные карточки', class: 'style-large-cards' },
+    { id: 5, name: 'Минимализм', class: 'style-minimal' },
+]
+
 export default function HomePage() {
     const navigate = useNavigate()
     const { storeId, storeName, storeAddress, setStore } = useCart()
@@ -78,6 +87,7 @@ export default function HomePage() {
     const [stores, setStores] = useState<Store[]>([])
     const [loading, setLoading] = useState(true)
     const [showStoreSelector, setShowStoreSelector] = useState(false)
+    const [styleVariant, setStyleVariant] = useState(1)
 
     useEffect(() => {
         async function loadData() {
@@ -106,8 +116,19 @@ export default function HomePage() {
         )
     }
 
+    const currentStyle = STYLE_VARIANTS.find(v => v.id === styleVariant)
+
+    const nextVariant = () => {
+        setStyleVariant(prev => prev >= STYLE_VARIANTS.length ? 1 : prev + 1)
+    }
+
     return (
-        <div className="page">
+        <div className={`page ${currentStyle?.class || ''}`}>
+            {/* Style Switcher — временная кнопка для выбора дизайна */}
+            <button className="style-switcher" onClick={nextVariant}>
+                🎨 {styleVariant}/{STYLE_VARIANTS.length}: {currentStyle?.name}
+            </button>
+
             {/* Header */}
             <div className="page-header">
                 <h1>VapeCity</h1>
