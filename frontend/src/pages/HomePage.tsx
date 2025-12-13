@@ -71,13 +71,11 @@ const CategoryIcons: Record<string, JSX.Element> = {
     ),
 }
 
-// Варианты дизайна
+// Варианты дизайна (3 варианта для выбора заказчиком)
 const STYLE_VARIANTS = [
     { id: 1, name: 'Компактный', class: 'style-compact' },
     { id: 2, name: 'Просторный', class: 'style-spacious' },
     { id: 3, name: 'Без заголовка', class: 'style-no-header' },
-    { id: 4, name: 'Крупные карточки', class: 'style-large-cards' },
-    { id: 5, name: 'Минимализм', class: 'style-minimal' },
 ]
 
 export default function HomePage() {
