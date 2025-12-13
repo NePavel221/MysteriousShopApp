@@ -1,13 +1,19 @@
 import Database from 'better-sqlite3'
-import { readFileSync } from 'fs'
+import { readFileSync, existsSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
+// Определяем корень проекта (работает и в dev, и в prod)
+const projectRoot = join(__dirname, '../..')
+
 // Путь к файлу базы данных
-const dbPath = join(__dirname, '../../data/vapecity.db')
+const dbPath = join(projectRoot, 'data/vapecity.db')
+
+// Путь к SQL файлам (всегда в src/db/)
+const sqlDir = join(projectRoot, 'src/db')
 
 // Создаём подключение
 export const db = new Database(dbPath)
@@ -24,17 +30,25 @@ export function initDatabase() {
     const hasData = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='categories'").get()
 
     // Читаем и выполняем схему (CREATE IF NOT EXISTS — безопасно)
-    const schemaPath = join(__dirname, 'schema.sql')
+    const schemaPath = join(sqlDir, 'schema.sql')
+    console.log(`📂 Путь к schema.sql: ${schemaPath}`)
+
+    if (!existsSync(schemaPath)) {
+        throw new Error(`schema.sql не найден: ${schemaPath}`)
+    }
+
     const schema = readFileSync(schemaPath, 'utf-8')
     db.exec(schema)
     console.log('✅ Схема создана')
 
     // Seed данные загружаем ТОЛЬКО если база пустая
     if (!hasData) {
-        const seedPath = join(__dirname, 'seed.sql')
-        const seed = readFileSync(seedPath, 'utf-8')
-        db.exec(seed)
-        console.log('✅ Демо-данные загружены')
+        const seedPath = join(sqlDir, 'seed.sql')
+        if (existsSync(seedPath)) {
+            const seed = readFileSync(seedPath, 'utf-8')
+            db.exec(seed)
+            console.log('✅ Демо-данные загружены')
+        }
     } else {
         console.log('ℹ️ База уже содержит данные, seed пропущен')
     }
