@@ -656,12 +656,13 @@ tr.out-of-stock td {
         flex-direction: column;
     }
 
-    /* Мобильный навбар — две строки */
+    /* Мобильный навбар — две строки, просторный */
     .sidebar {
         width: 100%;
-        padding: 12px 16px;
+        padding: 16px 16px 12px;
         flex-direction: column;
-        gap: 12px;
+        gap: 16px;
+        position: relative;
     }
 
     /* Верхняя строка: логотип + выход */
@@ -673,16 +674,26 @@ tr.out-of-stock td {
         border-bottom: none;
         padding-bottom: 0;
         margin-bottom: 0;
+        padding-right: 80px;
+        /* место для кнопки Выйти */
     }
 
     .logo h2 {
-        font-size: 20px;
+        font-size: 24px;
     }
 
+    /* Скрываем "Админ-панель" на мобильных — мешает */
     .logo span {
-        display: inline;
-        font-size: 11px;
-        margin-left: 8px;
+        display: none;
+    }
+
+    /* Кнопка выхода справа вверху */
+    .logout-btn {
+        position: absolute;
+        top: 14px;
+        right: 16px;
+        padding: 10px 16px;
+        font-size: 14px;
     }
 
     /* Нижняя строка: меню на всю ширину */
@@ -696,24 +707,12 @@ tr.out-of-stock td {
 
     .nav-menu li {
         flex: 1;
-        padding: 12px 8px;
+        padding: 14px 6px;
         margin-bottom: 0;
-        font-size: 13px;
+        font-size: 14px;
         white-space: nowrap;
-        border-radius: 8px;
+        border-radius: 10px;
         text-align: center;
-    }
-
-    .logout-btn {
-        position: absolute;
-        top: 12px;
-        right: 16px;
-        padding: 10px 14px;
-        font-size: 13px;
-    }
-
-    .sidebar {
-        position: relative;
     }
 
     .content {
