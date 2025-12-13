@@ -1,6 +1,38 @@
 /* VapeCity — Cyberpunk Neon Theme */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;500;600;700&display=swap');
 
+/* ========================================= */
+/* ПРИНУДИТЕЛЬНАЯ ТЁМНАЯ ТЕМА               */
+/* Переопределяем Telegram UI переменные    */
+/* ========================================= */
+html,
+body,
+#root,
+.app {
+    background: #050508 !important;
+    color: #ffffff !important;
+}
+
+/* Переопределяем Telegram UI CSS переменные */
+:root,
+[data-appearance="light"],
+[data-appearance="dark"],
+.tgui--light,
+.tgui--dark {
+    --tgui--bg_color: #050508 !important;
+    --tgui--secondary_bg_color: #0d0d14 !important;
+    --tgui--text_color: #ffffff !important;
+    --tgui--hint_color: #8888aa !important;
+    --tgui--link_color: #ff2d95 !important;
+    --tgui--button_color: #ff2d95 !important;
+    --tgui--button_text_color: #ffffff !important;
+    --tgui--header_bg_color: #0d0d14 !important;
+    --tgui--section_bg_color: #13131f !important;
+    --tgui--section_header_text_color: #8888aa !important;
+    --tgui--subtitle_text_color: #8888aa !important;
+    --tgui--destructive_text_color: #ff2d95 !important;
+}
+
 :root {
     /* Цвета — смелая неоновая палитра */
     --vc-black: #050508;
