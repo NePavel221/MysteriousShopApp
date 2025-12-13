@@ -447,6 +447,6 @@ export function notifyNewReservation(reservationId: number) {
     console.log(`📨 Уведомление отправлено ${sellerIds.length} продавцам`)
 }
 
-startBot()
+// startBot() вызывается из index.ts после initDatabase()
 
 export default bot

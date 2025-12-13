@@ -32,7 +32,9 @@ if (!existsSync(dataDir)) {
 initDatabase()
 
 // Теперь запускаем Telegram-бота (после инициализации БД)
-import('./bot/telegram-bot.js')
+import('./bot/telegram-bot.js').then(({ startBot }) => {
+    startBot()
+})
 
 // Автоотмена старых броней (запускается каждый час)
 function cancelExpiredReservations() {
