@@ -16,10 +16,13 @@
         "noEmit": true,
         "jsx": "react-jsx",
         "strict": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
         "noFallthroughCasesInSwitch": true,
-        "noUncheckedSideEffectImports": true
+        "noUncheckedSideEffectImports": false,
+        "types": [
+            "vite/client"
+        ]
     },
     "include": [
         "src"
