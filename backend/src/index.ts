@@ -12,8 +12,27 @@ import usersRouter from './routes/users.js'
 import adminRouter from './routes/admin.js'
 import reservationsRouter from './routes/reservations.js'
 
-// Запускаем Telegram-бота
-import './bot/telegram-bot.js'
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
+const app = express()
+const PORT = process.env.PORT || 3001
+
+// Middleware
+app.use(cors())
+app.use(express.json())
+
+// Создаём папку data если не существует
+const dataDir = join(__dirname, '../data')
+if (!existsSync(dataDir)) {
+    mkdirSync(dataDir, { recursive: true })
+}
+
+// Инициализируем базу данных ПЕРВЫМ ДЕЛОМ
+initDatabase()
+
+// Теперь запускаем Telegram-бота (после инициализации БД)
+import('./bot/telegram-bot.js')
 
 // Автоотмена старых броней (запускается каждый час)
 function cancelExpiredReservations() {
@@ -31,25 +50,6 @@ function cancelExpiredReservations() {
 // Запускаем сразу при старте и потом каждый час
 cancelExpiredReservations()
 setInterval(cancelExpiredReservations, 60 * 60 * 1000)
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-
-const app = express()
-const PORT = process.env.PORT || 3001
-
-// Middleware
-app.use(cors())
-app.use(express.json())
-
-// Создаём папку data если не существует
-const dataDir = join(__dirname, '../data')
-if (!existsSync(dataDir)) {
-    mkdirSync(dataDir, { recursive: true })
-}
-
-// Инициализируем базу данных
-initDatabase()
 
 // Создаём папку uploads если не существует
 const uploadsDir = join(process.cwd(), 'uploads')
