@@ -129,22 +129,30 @@ export default function ProductPage() {
                 </div>
 
                 {/* Кнопка добавления в корзину */}
-                {storeId && product.availability.some(a => a.store_id === storeId && a.quantity > 0) && (
-                    <button
-                        className={`neon-button add-to-cart-btn ${added ? 'added' : ''}`}
-                        onClick={() => {
-                            addItem(product)
-                            setAdded(true)
-                            setTimeout(() => setAdded(false), 1500)
-                        }}
-                    >
-                        {added ? '✓ Добавлено' : '🛒 В корзину'}
-                    </button>
-                )}
+                {/* Разрешаем добавление если: 
+                    - Выбрана точка и товар есть на ней
+                    - ИЛИ не выбрана точка (режим "Все") и товар есть хоть где-то
+                */}
+                {(storeId
+                    ? product.availability.some(a => a.store_id === storeId && a.quantity > 0)
+                    : product.availability.length > 0
+                ) && (
+                        <button
+                            className={`neon-button add-to-cart-btn ${added ? 'added' : ''}`}
+                            onClick={() => {
+                                addItem(product)
+                                setAdded(true)
+                                setTimeout(() => setAdded(false), 1500)
+                            }}
+                        >
+                            {added ? '✓ Добавлено' : '🛒 В корзину'}
+                        </button>
+                    )}
 
-                {!storeId && (
+                {/* Подсказка если товара нет в наличии */}
+                {product.availability.length === 0 && (
                     <div className="select-store-hint">
-                        Выберите точку на главной, чтобы добавить в корзину
+                        Товар отсутствует во всех магазинах
                     </div>
                 )}
             </div>

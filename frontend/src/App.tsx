@@ -31,15 +31,11 @@ function AppContent() {
                 <Route path="/reservation/:id" element={<ReservationPage />} />
             </Routes>
 
-            {/* Нижняя навигация */}
+            {/* Нижняя навигация — 3 вкладки */}
             <nav className="tab-bar">
                 <NavLink to="/" className={({ isActive }) => `tab-item ${isActive ? 'active' : ''}`}>
                     <span className="icon">🏠</span>
                     <span>Главная</span>
-                </NavLink>
-                <NavLink to="/catalog" className={({ isActive }) => `tab-item ${isActive ? 'active' : ''}`}>
-                    <span className="icon">📦</span>
-                    <span>Каталог</span>
                 </NavLink>
                 <NavLink to="/cart" className={({ isActive }) => `tab-item ${isActive ? 'active' : ''}`}>
                     <span className="icon">🛒</span>

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Spinner } from '@telegram-apps/telegram-ui'
-import { getCategories, getStores } from '../api'
+import { getCategories, getStores, getProducts } from '../api'
 import { useCart } from '../context/CartContext'
-import type { Category, Store } from '../types'
+import type { Category, Store, Product } from '../types'
 
-// SVG иконки для категорий — каждая уникальная
+// SVG иконки для категорий
 const CategoryIcons: Record<string, JSX.Element> = {
     'liquids': (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: '#00f0ff' }}>
@@ -71,12 +71,7 @@ const CategoryIcons: Record<string, JSX.Element> = {
     ),
 }
 
-// Варианты дизайна (3 варианта для выбора заказчиком)
-const STYLE_VARIANTS = [
-    { id: 1, name: 'Компактный', class: 'style-compact' },
-    { id: 2, name: 'Просторный', class: 'style-spacious' },
-    { id: 3, name: 'Без заголовка', class: 'style-no-header' },
-]
+const NICOTINE_OPTIONS = ['Все', '20 мг', '40 мг', '50 мг']
 
 export default function HomePage() {
     const navigate = useNavigate()
@@ -85,7 +80,14 @@ export default function HomePage() {
     const [stores, setStores] = useState<Store[]>([])
     const [loading, setLoading] = useState(true)
     const [showStoreSelector, setShowStoreSelector] = useState(false)
-    const [styleVariant, setStyleVariant] = useState(1)
+
+    // Состояние для отображения товаров категории
+    const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
+    const [products, setProducts] = useState<Product[]>([])
+    const [productsLoading, setProductsLoading] = useState(false)
+    const [nicotineFilter, setNicotineFilter] = useState('Все')
+    const [searchInput, setSearchInput] = useState('')
+    const [search, setSearch] = useState('')
 
     useEffect(() => {
         async function loadData() {
@@ -93,10 +95,6 @@ export default function HomePage() {
                 const [cats, strs] = await Promise.all([getCategories(), getStores()])
                 setCategories(cats)
                 setStores(strs)
-                // Если точка не выбрана, выбираем первую
-                if (!storeId && strs.length > 0) {
-                    setStore(strs[0].id, strs[0].name, strs[0].address)
-                }
             } catch (error) {
                 console.error('Ошибка загрузки:', error)
             } finally {
@@ -104,7 +102,51 @@ export default function HomePage() {
             }
         }
         loadData()
-    }, [storeId, setStore])
+    }, [])
+
+    // Debounce для поиска
+    useEffect(() => {
+        const timer = setTimeout(() => setSearch(searchInput), 300)
+        return () => clearTimeout(timer)
+    }, [searchInput])
+
+    // Загрузка товаров при выборе категории
+    useEffect(() => {
+        if (!selectedCategory) return
+
+        async function loadProducts() {
+            setProductsLoading(true)
+            try {
+                const nicotineParam = nicotineFilter !== 'Все' ? nicotineFilter : undefined
+                const prods = await getProducts({
+                    category: selectedCategory.slug,
+                    store_id: storeId || undefined,
+                    search: search || undefined,
+                    nicotine: nicotineParam
+                })
+                setProducts(prods)
+            } catch (error) {
+                console.error('Ошибка загрузки товаров:', error)
+            } finally {
+                setProductsLoading(false)
+            }
+        }
+        loadProducts()
+    }, [selectedCategory, storeId, search, nicotineFilter])
+
+    const handleCategoryClick = (category: Category) => {
+        setSelectedCategory(category)
+        setNicotineFilter('Все')
+        setSearchInput('')
+        setSearch('')
+    }
+
+    const handleBack = () => {
+        setSelectedCategory(null)
+        setProducts([])
+        setSearchInput('')
+        setSearch('')
+    }
 
     if (loading) {
         return (
@@ -114,19 +156,89 @@ export default function HomePage() {
         )
     }
 
-    const currentStyle = STYLE_VARIANTS.find(v => v.id === styleVariant)
+    // Показывать фильтр по крепости только для жидкостей
+    const showNicotineFilter = selectedCategory?.slug === 'liquids'
 
-    const nextVariant = () => {
-        setStyleVariant(prev => prev >= STYLE_VARIANTS.length ? 1 : prev + 1)
+    // Режим просмотра товаров категории
+    if (selectedCategory) {
+        return (
+            <div className="page">
+                {/* Кнопка назад */}
+                <button className="back-button" onClick={handleBack}>
+                    ←
+                </button>
+
+                {/* Заголовок категории */}
+                <div className="page-header" style={{ paddingLeft: '60px' }}>
+                    <h1 style={{ fontSize: '20px' }}>{selectedCategory.name}</h1>
+                    <p>{storeId ? storeName : 'Все точки'}</p>
+                </div>
+
+                {/* Поиск */}
+                <div className="search-bar" style={{ paddingTop: '8px' }}>
+                    <input
+                        type="text"
+                        className="search-input"
+                        placeholder="🔍 Поиск товаров..."
+                        value={searchInput}
+                        onChange={(e) => setSearchInput(e.target.value)}
+                    />
+                </div>
+
+                {/* Фильтр по крепости (только для жидкостей) */}
+                {showNicotineFilter && (
+                    <div className="filter-scroll">
+                        {NICOTINE_OPTIONS.map(opt => (
+                            <button
+                                key={opt}
+                                className={`filter-btn ${nicotineFilter === opt ? 'active' : ''}`}
+                                onClick={() => setNicotineFilter(opt)}
+                            >
+                                {opt === 'Все' ? '💧 Все' : `⚡ ${opt}`}
+                            </button>
+                        ))}
+                    </div>
+                )}
+
+                {/* Товары */}
+                {productsLoading ? (
+                    <div className="loading">
+                        <Spinner size="l" />
+                    </div>
+                ) : products.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '40px', color: 'var(--vc-text-dim)' }}>
+                        {storeId ? 'Нет товаров на этой точке' : 'Товары не найдены'}
+                    </div>
+                ) : (
+                    <div className="product-grid">
+                        {products.map((product, index) => (
+                            <div
+                                key={product.id}
+                                className="product-card"
+                                onClick={() => navigate(`/product/${product.id}`)}
+                                style={{ animationDelay: `${index * 0.05}s` }}
+                            >
+                                <img
+                                    src={product.image_url || 'https://placehold.co/400x400/13131f/666?text=No+Image'}
+                                    alt={product.name}
+                                    loading="lazy"
+                                />
+                                <div className="info">
+                                    <div className="brand">{product.brand}</div>
+                                    <div className="name">{product.name}</div>
+                                    <div className="price">{product.price} ₽</div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        )
     }
 
+    // Главная страница с категориями
     return (
-        <div className={`page ${currentStyle?.class || ''}`}>
-            {/* Style Switcher — временная кнопка для выбора дизайна */}
-            <button className="style-switcher" onClick={nextVariant}>
-                🎨 {styleVariant}/{STYLE_VARIANTS.length}: {currentStyle?.name}
-            </button>
-
+        <div className="page">
             {/* Header */}
             <div className="page-header">
                 <h1>VapeCity</h1>
@@ -139,14 +251,25 @@ export default function HomePage() {
                     className="store-item selected"
                     onClick={() => setShowStoreSelector(!showStoreSelector)}
                 >
-                    <div className="name">📍 {storeName || 'Выберите точку'}</div>
-                    <div className="address">{storeAddress}</div>
+                    <div className="name">📍 {storeId ? storeName : 'Все точки'}</div>
+                    <div className="address">{storeId ? storeAddress : 'Показать товары со всех магазинов'}</div>
                     <div className="selector-arrow">{showStoreSelector ? '▲' : '▼'}</div>
                 </div>
             </div>
 
             {showStoreSelector && (
                 <div className="store-selector store-list">
+                    {/* Опция "Все точки" */}
+                    <div
+                        className={`store-item ${!storeId ? 'selected' : ''}`}
+                        onClick={() => {
+                            setStore(null, 'Все точки', '')
+                            setShowStoreSelector(false)
+                        }}
+                    >
+                        <div className="name">🌐 Все точки</div>
+                        <div className="address">Показать товары со всех магазинов</div>
+                    </div>
                     {stores.map(store => (
                         <div
                             key={store.id}
@@ -169,7 +292,7 @@ export default function HomePage() {
                     <div
                         key={category.id}
                         className="category-card"
-                        onClick={() => navigate(`/catalog/${category.slug}`)}
+                        onClick={() => handleCategoryClick(category)}
                     >
                         <div className="icon">
                             {CategoryIcons[category.slug] || <span>{category.icon}</span>}

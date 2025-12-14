@@ -49,6 +49,26 @@ export async function getProduct(id: number): Promise<ProductDetails> {
     return res.json()
 }
 
+// Проверка наличия товаров корзины на точках
+export interface StoreAvailability {
+    store_id: number
+    store_name: string
+    address: string
+    available_count: number
+    total_count: number
+    available_products: { product_id: number; quantity: number }[]
+}
+
+export async function checkCartAvailability(productIds: number[]): Promise<StoreAvailability[]> {
+    const res = await fetch(`${API_BASE}/products/check-availability`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_ids: productIds })
+    })
+    if (!res.ok) throw new Error('Ошибка проверки наличия')
+    return res.json()
+}
+
 // Пользователи
 export async function getUser(telegramId: number): Promise<User> {
     const res = await fetch(`${API_BASE}/users/${telegramId}`)

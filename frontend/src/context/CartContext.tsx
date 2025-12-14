@@ -93,13 +93,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setItems([])
     }
 
-    const setStore = (id: number, name: string, address: string) => {
-        if (storeId && storeId !== id && items.length > 0) {
-            if (!confirm('При смене точки корзина будет очищена. Продолжить?')) {
-                return
-            }
-            setItems([])
-        }
+    const setStore = (id: number | null, name: string, address: string) => {
+        // Больше не очищаем корзину при смене точки
+        // Пользователь может набрать товары в режиме "Все", а потом выбрать точку
         setStoreId(id)
         setStoreName(name)
         setStoreAddress(address)

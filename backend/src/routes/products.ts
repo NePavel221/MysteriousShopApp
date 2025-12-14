@@ -125,4 +125,44 @@ router.get('/:id', (req, res) => {
   }
 })
 
+// POST /api/products/check-availability — проверка наличия товаров корзины на точках
+router.post('/check-availability', (req, res) => {
+  try {
+    const { product_ids } = req.body
+
+    if (!product_ids || !Array.isArray(product_ids) || product_ids.length === 0) {
+      return res.status(400).json({ error: 'Требуется массив product_ids' })
+    }
+
+    // Получаем все точки
+    const stores = db.prepare(`
+      SELECT id, name, address FROM stores WHERE is_active = 1 ORDER BY id
+    `).all() as { id: number; name: string; address: string }[]
+
+    // Для каждой точки считаем сколько товаров из корзины есть в наличии
+    const result = stores.map(store => {
+      const placeholders = product_ids.map(() => '?').join(',')
+      const availableProducts = db.prepare(`
+        SELECT product_id, quantity 
+        FROM store_inventory 
+        WHERE store_id = ? AND product_id IN (${placeholders}) AND quantity > 0
+      `).all(store.id, ...product_ids) as { product_id: number; quantity: number }[]
+
+      return {
+        store_id: store.id,
+        store_name: store.name,
+        address: store.address,
+        available_count: availableProducts.length,
+        total_count: product_ids.length,
+        available_products: availableProducts
+      }
+    })
+
+    res.json(result)
+  } catch (error) {
+    console.error('Ошибка проверки наличия:', error)
+    res.status(500).json({ error: 'Ошибка сервера' })
+  }
+})
+
 export default router
