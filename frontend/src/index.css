@@ -1030,13 +1030,12 @@ body::before {
 }
 
 .checkout-footer {
-    position: fixed;
-    bottom: 80px;
-    left: 0;
-    right: 0;
-    background: var(--vc-dark);
-    border-top: 1px solid rgba(255, 45, 149, 0.2);
-    padding: 16px 20px;
+    background: var(--vc-card);
+    border: 1px solid rgba(255, 45, 149, 0.2);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 16px;
+    margin-bottom: 100px;
 }
 
 .checkout-total {
@@ -1652,25 +1651,13 @@ body::before {
     color: var(--vc-neon-magenta);
 }
 
-/* Улучшенный футер checkout */
-.checkout-footer {
-    position: fixed;
-    bottom: 80px;
-    left: 0;
-    right: 0;
-    background: linear-gradient(180deg, transparent 0%, var(--vc-dark) 20%);
-    padding: 24px 20px 16px;
-    z-index: 50;
-}
-
+/* Улучшенный футер checkout — убран fixed */
 .checkout-footer::before {
     content: '';
-    position: absolute;
-    top: 0;
-    left: 20px;
-    right: 20px;
+    display: block;
     height: 1px;
     background: var(--vc-gradient-main);
+    margin-bottom: 16px;
 }
 
 .checkout-total {
