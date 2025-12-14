@@ -12,6 +12,7 @@ export default function ProductPage() {
     const [product, setProduct] = useState<ProductDetails | null>(null)
     const [loading, setLoading] = useState(true)
     const [added, setAdded] = useState(false)
+    const [quantity, setQuantity] = useState(1)
 
     useEffect(() => {
         async function loadProduct() {
@@ -128,25 +129,45 @@ export default function ProductPage() {
                     )}
                 </div>
 
-                {/* Кнопка добавления в корзину */}
-                {/* Разрешаем добавление если: 
-                    - Выбрана точка и товар есть на ней
-                    - ИЛИ не выбрана точка (режим "Все") и товар есть хоть где-то
-                */}
+                {/* Блок добавления в корзину со счётчиком */}
                 {(storeId
                     ? product.availability.some(a => a.store_id === storeId && a.quantity > 0)
                     : product.availability.length > 0
                 ) && (
-                        <button
-                            className={`neon-button add-to-cart-btn ${added ? 'added' : ''}`}
-                            onClick={() => {
-                                addItem(product)
-                                setAdded(true)
-                                setTimeout(() => setAdded(false), 1500)
-                            }}
-                        >
-                            {added ? '✓ Добавлено' : '🛒 В корзину'}
-                        </button>
+                        <div className="add-to-cart-section">
+                            {/* Счётчик количества */}
+                            <div className="quantity-selector">
+                                <button
+                                    className="qty-btn"
+                                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                                    disabled={quantity <= 1}
+                                >
+                                    −
+                                </button>
+                                <span className="qty-value">{quantity}</span>
+                                <button
+                                    className="qty-btn"
+                                    onClick={() => setQuantity(q => q + 1)}
+                                >
+                                    +
+                                </button>
+                            </div>
+
+                            {/* Кнопка добавления */}
+                            <button
+                                className={`neon-button add-to-cart-btn ${added ? 'added' : ''}`}
+                                onClick={() => {
+                                    for (let i = 0; i < quantity; i++) {
+                                        addItem(product)
+                                    }
+                                    setAdded(true)
+                                    setQuantity(1)
+                                    setTimeout(() => setAdded(false), 1500)
+                                }}
+                            >
+                                {added ? '✓ Добавлено' : `🛒 В корзину • ${product.price * quantity} ₽`}
+                            </button>
+                        </div>
                     )}
 
                 {/* Подсказка если товара нет в наличии */}

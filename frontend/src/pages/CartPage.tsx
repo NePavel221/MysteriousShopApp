@@ -12,6 +12,7 @@ export default function CartPage() {
     const [storeAvailability, setStoreAvailability] = useState<StoreAvailability[]>([])
     const [loading, setLoading] = useState(false)
     const [expandedStore, setExpandedStore] = useState<number | null>(null)
+    const [showStoreSelection, setShowStoreSelection] = useState(false)
 
     const getImageUrl = (url: string) => {
         if (!url) return 'https://placehold.co/80x80/1a1a2e/ff00ff?text=?'
@@ -19,9 +20,9 @@ export default function CartPage() {
         return url
     }
 
-    // Загружаем наличие на точках когда корзина не пуста и точка не выбрана
+    // Загружаем наличие на точках когда переходим к выбору точки
     useEffect(() => {
-        if (items.length === 0) return
+        if (!showStoreSelection || items.length === 0) return
 
         async function loadAvailability() {
             setLoading(true)
@@ -36,7 +37,7 @@ export default function CartPage() {
             }
         }
         loadAvailability()
-    }, [items])
+    }, [showStoreSelection, items])
 
     if (items.length === 0) {
         return (
@@ -71,6 +72,136 @@ export default function CartPage() {
         ? storeAvailability.find(s => s.store_id === storeId)?.available_count || 0
         : 0
 
+    // ШАГ 2: Выбор точки для получения
+    if (showStoreSelection) {
+        return (
+            <div className="page">
+                <div className="cart-header">
+                    <button className="back-btn" onClick={() => {
+                        setShowStoreSelection(false)
+                        setStore(null, '', '')
+                    }}>
+                        ← Назад
+                    </button>
+                    <h1>Выбор точки</h1>
+                </div>
+
+                {!storeId ? (
+                    // Список точек
+                    <div className="store-selection-section">
+                        <p className="section-hint">Выберите магазин для получения заказа</p>
+                        {loading ? (
+                            <div className="loading" style={{ minHeight: '100px' }}>
+                                <Spinner size="m" />
+                            </div>
+                        ) : (
+                            <div className="store-availability-list">
+                                {storeAvailability.map(store => (
+                                    <div key={store.store_id} className="store-availability-card">
+                                        <div
+                                            className="store-availability-header"
+                                            onClick={() => setExpandedStore(
+                                                expandedStore === store.store_id ? null : store.store_id
+                                            )}
+                                        >
+                                            <div className="store-info">
+                                                <div className="store-name">{store.store_name}</div>
+                                                <div className="store-address">{store.address}</div>
+                                            </div>
+                                            <div className={`availability-badge ${store.available_count === store.total_count ? 'full' :
+                                                    store.available_count > 0 ? 'partial' : 'none'
+                                                }`}>
+                                                {store.available_count} из {store.total_count}
+                                            </div>
+                                        </div>
+
+                                        {expandedStore === store.store_id && (
+                                            <div className="store-products-detail">
+                                                {items.map(item => {
+                                                    const available = store.available_products.find(
+                                                        p => p.product_id === item.product_id
+                                                    )
+                                                    return (
+                                                        <div key={item.product_id} className={`product-availability-row ${available ? 'available' : 'unavailable'}`}>
+                                                            <span className="product-name">{item.name}</span>
+                                                            <span className="product-status">
+                                                                {available ? `✓ ${available.quantity} шт` : '✕ Нет'}
+                                                            </span>
+                                                        </div>
+                                                    )
+                                                })}
+                                                {store.available_count > 0 && (
+                                                    <button
+                                                        className="neon-button select-store-btn"
+                                                        onClick={() => setStore(store.store_id, store.store_name, store.address)}
+                                                    >
+                                                        Выбрать эту точку
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    // Точка выбрана — показываем итог и кнопку бронирования
+                    <>
+                        <div className="selected-store-card">
+                            <div className="store-info">
+                                <div className="store-name">📍 {storeName}</div>
+                                <div className="store-address">{storeAddress}</div>
+                            </div>
+                            <button
+                                className="change-store-btn"
+                                onClick={() => setStore(null, '', '')}
+                            >
+                                Изменить
+                            </button>
+                        </div>
+
+                        {/* Краткий список товаров */}
+                        <div className="checkout-items-summary">
+                            {items.map(item => {
+                                const availability = getItemAvailability(item.product_id)
+                                const isAvailable = availability !== null && availability > 0
+                                return (
+                                    <div key={item.product_id} className={`checkout-item-row ${!isAvailable ? 'unavailable' : ''}`}>
+                                        <span className="item-name">{item.name}</span>
+                                        <span className="item-qty">× {item.quantity}</span>
+                                        <span className="item-price">{item.price * item.quantity} ₽</span>
+                                        {!isAvailable && <span className="item-unavailable">Нет</span>}
+                                    </div>
+                                )
+                            })}
+                        </div>
+
+                        <div className="cart-footer">
+                            <div className="cart-total">
+                                <span>Итого:</span>
+                                <span className="cart-total-price">{totalPrice} ₽</span>
+                            </div>
+                            {availableOnSelectedStore < items.length && (
+                                <div className="availability-warning">
+                                    ⚠️ {items.length - availableOnSelectedStore} товар(ов) нет на этой точке
+                                </div>
+                            )}
+                            <button
+                                className="neon-button checkout-btn"
+                                onClick={() => navigate('/checkout')}
+                                disabled={availableOnSelectedStore === 0}
+                            >
+                                ✨ Забронировать
+                            </button>
+                        </div>
+                    </>
+                )}
+            </div>
+        )
+    }
+
+    // ШАГ 1: Просмотр и редактирование товаров в корзине
     return (
         <div className="page">
             <div className="cart-header">
@@ -78,131 +209,39 @@ export default function CartPage() {
                 <button className="clear-cart-btn" onClick={clearCart}>Очистить</button>
             </div>
 
-            {/* Выбор точки для получения */}
-            {!storeId ? (
-                <div className="store-selection-section">
-                    <h3 className="section-title">📍 Выберите точку для получения</h3>
-                    {loading ? (
-                        <div className="loading" style={{ minHeight: '100px' }}>
-                            <Spinner size="m" />
+            {/* Товары корзины */}
+            <div className="cart-items">
+                {items.map(item => (
+                    <div key={item.product_id} className="cart-item">
+                        <img src={getImageUrl(item.image_url)} alt="" className="cart-item-image" />
+                        <div className="cart-item-info">
+                            <div className="cart-item-name">{item.name}</div>
+                            <div className="cart-item-brand">{item.brand}</div>
+                            <div className="cart-item-price">{item.price * item.quantity} ₽</div>
                         </div>
-                    ) : (
-                        <div className="store-availability-list">
-                            {storeAvailability.map(store => (
-                                <div key={store.store_id} className="store-availability-card">
-                                    <div
-                                        className="store-availability-header"
-                                        onClick={() => setExpandedStore(
-                                            expandedStore === store.store_id ? null : store.store_id
-                                        )}
-                                    >
-                                        <div className="store-info">
-                                            <div className="store-name">{store.store_name}</div>
-                                            <div className="store-address">{store.address}</div>
-                                        </div>
-                                        <div className={`availability-badge ${store.available_count === store.total_count ? 'full' :
-                                                store.available_count > 0 ? 'partial' : 'none'
-                                            }`}>
-                                            {store.available_count} из {store.total_count}
-                                        </div>
-                                    </div>
+                        <div className="cart-item-controls">
+                            <button className="qty-btn" onClick={() => updateQuantity(item.product_id, item.quantity - 1)}>−</button>
+                            <span className="qty-value">{item.quantity}</span>
+                            <button className="qty-btn" onClick={() => updateQuantity(item.product_id, item.quantity + 1)}>+</button>
+                        </div>
+                        <button className="remove-btn" onClick={() => removeItem(item.product_id)}>✕</button>
+                    </div>
+                ))}
+            </div>
 
-                                    {/* Развёрнутый список товаров */}
-                                    {expandedStore === store.store_id && (
-                                        <div className="store-products-detail">
-                                            {items.map(item => {
-                                                const available = store.available_products.find(
-                                                    p => p.product_id === item.product_id
-                                                )
-                                                return (
-                                                    <div key={item.product_id} className={`product-availability-row ${available ? 'available' : 'unavailable'}`}>
-                                                        <span className="product-name">{item.name}</span>
-                                                        <span className="product-status">
-                                                            {available ? `✓ ${available.quantity} шт` : '✕ Нет'}
-                                                        </span>
-                                                    </div>
-                                                )
-                                            })}
-                                            {store.available_count > 0 && (
-                                                <button
-                                                    className="neon-button select-store-btn"
-                                                    onClick={() => setStore(store.store_id, store.store_name, store.address)}
-                                                >
-                                                    Выбрать эту точку
-                                                </button>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    )}
+            {/* Футер с итогом и кнопкой "Далее" */}
+            <div className="cart-footer">
+                <div className="cart-total">
+                    <span>Итого:</span>
+                    <span className="cart-total-price">{totalPrice} ₽</span>
                 </div>
-            ) : (
-                <>
-                    {/* Выбранная точка */}
-                    <div
-                        className="cart-store selected-store"
-                        onClick={() => setStore(null, '', '')}
-                    >
-                        <div className="store-info">
-                            <span>📍 {storeName}</span>
-                            <span className="store-address-small">{storeAddress}</span>
-                        </div>
-                        <div className="change-store-hint">
-                            {availableOnSelectedStore} из {items.length} товаров • Сменить ▼
-                        </div>
-                    </div>
-
-                    {/* Товары корзины */}
-                    <div className="cart-items">
-                        {items.map(item => {
-                            const availability = getItemAvailability(item.product_id)
-                            const isAvailable = availability !== null && availability > 0
-
-                            return (
-                                <div key={item.product_id} className={`cart-item ${!isAvailable ? 'unavailable' : ''}`}>
-                                    <img src={getImageUrl(item.image_url)} alt="" className="cart-item-image" />
-                                    <div className="cart-item-info">
-                                        <div className="cart-item-name">{item.name}</div>
-                                        <div className="cart-item-brand">{item.brand}</div>
-                                        <div className="cart-item-price">{item.price} ₽</div>
-                                        {!isAvailable && (
-                                            <div className="cart-item-unavailable">Нет на этой точке</div>
-                                        )}
-                                    </div>
-                                    <div className="cart-item-controls">
-                                        <button className="qty-btn" onClick={() => updateQuantity(item.product_id, item.quantity - 1)}>−</button>
-                                        <span className="qty-value">{item.quantity}</span>
-                                        <button className="qty-btn" onClick={() => updateQuantity(item.product_id, item.quantity + 1)}>+</button>
-                                    </div>
-                                    <button className="remove-btn" onClick={() => removeItem(item.product_id)}>✕</button>
-                                </div>
-                            )
-                        })}
-                    </div>
-                </>
-            )}
-
-            {/* Футер с итогом — только когда точка выбрана */}
-            {storeId && (
-                <div className="cart-footer">
-                    <div className="cart-total">
-                        <span>Итого:</span>
-                        <span className="cart-total-price">{totalPrice} ₽</span>
-                    </div>
-                    <button
-                        className="neon-button checkout-btn"
-                        onClick={() => navigate('/checkout')}
-                        disabled={availableOnSelectedStore === 0}
-                    >
-                        {availableOnSelectedStore === items.length
-                            ? '✨ Оформить бронь'
-                            : `✨ Оформить (${availableOnSelectedStore} из ${items.length})`
-                        }
-                    </button>
-                </div>
-            )}
+                <button
+                    className="neon-button checkout-btn"
+                    onClick={() => setShowStoreSelection(true)}
+                >
+                    Далее → Выбрать точку
+                </button>
+            </div>
         </div>
     )
 }
