@@ -4,7 +4,7 @@ import { Spinner, Button } from '@telegram-apps/telegram-ui'
 import { getUser, generateDiscountCode } from '../api'
 import type { User } from '../types'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API_URL = ''
 
 interface Reservation {
     id: number

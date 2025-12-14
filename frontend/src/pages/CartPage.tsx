@@ -4,7 +4,7 @@ import { Spinner } from '@telegram-apps/telegram-ui'
 import { useCart } from '../context/CartContext'
 import { checkCartAvailability, StoreAvailability } from '../api'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API_URL = ''
 
 export default function CartPage() {
     const navigate = useNavigate()
@@ -109,7 +109,7 @@ export default function CartPage() {
                                                 <div className="store-address">{store.address}</div>
                                             </div>
                                             <div className={`availability-badge ${store.available_count === store.total_count ? 'full' :
-                                                    store.available_count > 0 ? 'partial' : 'none'
+                                                store.available_count > 0 ? 'partial' : 'none'
                                                 }`}>
                                                 {store.available_count} из {store.total_count}
                                             </div>
