@@ -905,13 +905,13 @@ body::before {
 
 /* Cart Footer */
 .cart-footer {
-    position: fixed;
-    bottom: 80px;
-    left: 0;
-    right: 0;
-    background: var(--vc-dark);
+    background: var(--vc-card);
     border-top: 1px solid rgba(255, 45, 149, 0.2);
-    padding: 16px 20px;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 16px;
+    margin-bottom: 100px;
+    /* Отступ для нижней навигации */
 }
 
 .cart-total {
@@ -1401,25 +1401,13 @@ body::before {
     transform: scale(0.95);
 }
 
-/* Улучшенный футер корзины */
-.cart-footer {
-    position: fixed;
-    bottom: 80px;
-    left: 0;
-    right: 0;
-    background: linear-gradient(180deg, transparent 0%, var(--vc-dark) 20%);
-    padding: 24px 20px 16px;
-    z-index: 50;
-}
-
+/* Улучшенный футер корзины — убран fixed, теперь в потоке документа */
 .cart-footer::before {
     content: '';
-    position: absolute;
-    top: 0;
-    left: 20px;
-    right: 20px;
+    display: block;
     height: 1px;
     background: var(--vc-gradient-main);
+    margin-bottom: 16px;
 }
 
 .cart-total-price {
