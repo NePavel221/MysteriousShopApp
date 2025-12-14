@@ -31,9 +31,16 @@ if (!existsSync(dataDir)) {
 // Инициализируем базу данных ПЕРВЫМ ДЕЛОМ
 initDatabase()
 
-// Теперь запускаем Telegram-бота (после инициализации БД)
-import('./bot/telegram-bot.js').then(({ startBot }) => {
-    startBot()
+// Запускаем все три Telegram-бота (после инициализации БД)
+Promise.all([
+    import('./bot/telegram-bot.js'),
+    import('./bot/main-bot.js'),
+    import('./bot/admin-bot.js')
+]).then(([sellerBot, mainBot, adminBot]) => {
+    sellerBot.startBot()      // Бот для продавцов
+    mainBot.startMainBot()    // Основной бот для клиентов
+    adminBot.startAdminBot()  // Бот админки
+    console.log('🤖 Все боты запущены!')
 })
 
 // Автоотмена старых броней (запускается каждый час)

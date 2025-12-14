@@ -1,8 +1,14 @@
 import TelegramBot from 'node-telegram-bot-api'
 import { db } from '../db/database.js'
 
+// Токен бота для работников (продавцов)
+const SELLER_BOT_TOKEN = '8405418134:AAHlxcq_Xe7nn--RZP2bvezfrXNvjMP1dU0'
+
 let bot: TelegramBot | null = null
 let currentToken: string | null = null
+
+// Стикер приветствия для продавцов
+const SELLER_STICKER = 'CAACAgIAAxkBAAEBJ_Zl8K8AAXKvAAHxAAGKAAFnAAHqAAHqAAEAAQADAgADdwADNQQ'
 
 const mainKeyboard = {
     keyboard: [
@@ -141,26 +147,44 @@ function buildReservationButtons(reservations: any[], page: number, backAction: 
 }
 
 function setupBotHandlers(botInstance: TelegramBot) {
-    botInstance.onText(/\/start/, (msg) => {
+    botInstance.onText(/\/start/, async (msg) => {
         const chatId = msg.chat.id
+        const firstName = msg.from?.first_name || 'коллега'
         const stores = getSellerStores(chatId)
 
-        let text = `👋 <b>Привет!</b>\n\n`
-        text += `Я бот VapeCity для продавцов. Буду присылать тебе уведомления о новых бронях, `
-        text += `чтобы ты всегда знал, когда клиент придёт за заказом.\n\n`
+        // Отправляем стикер
+        try {
+            await botInstance.sendSticker(chatId, SELLER_STICKER)
+        } catch (e) {
+            // Стикер не критичен
+        }
+
+        let text = `Привет, ${firstName}! 👋\n\n`
+        text += `Это <b>бот VapeCity для продавцов</b> — твой помощник в работе с бронями клиентов.\n\n`
+
+        text += `📱 <b>Как это работает:</b>\n`
+        text += `• Клиент бронирует товар через приложение\n`
+        text += `• Тебе приходит уведомление с деталями заказа\n`
+        text += `• Нажимаешь «Принять» — клиент видит подтверждение\n`
+        text += `• Когда клиент пришёл — нажимаешь «Выдать»\n\n`
+
+        text += `🔘 <b>Кнопки управления:</b>\n`
+        text += `• <b>📋 Брони</b> — посмотреть все активные брони на сегодня\n`
+        text += `• <b>✅ Принять</b> — подтвердить бронь (клиент получит уведомление)\n`
+        text += `• <b>🎉 Выдать</b> — отметить заказ как выданный\n`
+        text += `• <b>❌ Отменить</b> — отменить бронь (если клиент не придёт)\n\n`
 
         if (stores.length > 0) {
             text += `📍 <b>Твои точки:</b>\n`
             text += stores.map(s => `• ${s.address}`).join('\n')
             text += `\n\n`
-            text += `Используй кнопки внизу, чтобы посмотреть текущие брони. `
-            text += `Когда клиент придёт — нажми "Выдать". Если бронь отменяется — "Отменить".`
+            text += `Ты будешь получать уведомления только по своим точкам. Удачной смены! 💪`
         } else {
-            text += `⚠️ Ты пока не привязан ни к одной точке. `
-            text += `Попроси администратора добавить тебя в систему.`
+            text += `⚠️ <b>Внимание:</b> Ты пока не привязан ни к одной точке.\n`
+            text += `Попроси администратора добавить тебя в систему через админку.`
         }
 
-        botInstance.sendMessage(chatId, text, { parse_mode: 'HTML', reply_markup: mainKeyboard })
+        await botInstance.sendMessage(chatId, text, { parse_mode: 'HTML', reply_markup: mainKeyboard })
     })
 
 
@@ -376,17 +400,18 @@ function getTokenFromDB(): string | null {
 }
 
 export function startBot(token?: string): boolean {
-    const newToken = token || getTokenFromDB()
+    // Используем токен из параметра, из БД, или захардкоженный
+    const newToken = token || getTokenFromDB() || SELLER_BOT_TOKEN
     if (!newToken) {
         console.log('⚠️ Токен бота не настроен')
         return false
     }
     if (newToken === currentToken && bot) {
-        console.log('ℹ️ Бот уже работает с этим токеном')
+        console.log('ℹ️ Бот для продавцов уже работает')
         return true
     }
     if (bot) {
-        console.log('🔄 Перезапуск бота...')
+        console.log('🔄 Перезапуск бота для продавцов...')
         bot.stopPolling()
         bot = null
     }
@@ -394,10 +419,10 @@ export function startBot(token?: string): boolean {
         bot = new TelegramBot(newToken, { polling: true })
         currentToken = newToken
         setupBotHandlers(bot)
-        console.log('🤖 Telegram-бот VapeCity запущен!')
+        console.log('👷 Telegram-бот VapeCity для продавцов запущен!')
         return true
     } catch (err: any) {
-        console.error('❌ Ошибка запуска бота:', err.message)
+        console.error('❌ Ошибка запуска бота для продавцов:', err.message)
         bot = null
         currentToken = null
         return false
