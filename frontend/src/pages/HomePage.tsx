@@ -114,12 +114,14 @@ export default function HomePage() {
     useEffect(() => {
         if (!selectedCategory) return
 
+        const categorySlug = selectedCategory.slug
+
         async function loadProducts() {
             setProductsLoading(true)
             try {
                 const nicotineParam = nicotineFilter !== 'Все' ? nicotineFilter : undefined
                 const prods = await getProducts({
-                    category: selectedCategory.slug,
+                    category: categorySlug,
                     store_id: storeId || undefined,
                     search: search || undefined,
                     nicotine: nicotineParam

@@ -18,7 +18,7 @@ interface CartContextType {
     removeItem: (productId: number) => void
     updateQuantity: (productId: number, quantity: number) => void
     clearCart: () => void
-    setStore: (id: number, name: string, address: string) => void
+    setStore: (id: number | null, name: string, address: string) => void
     totalItems: number
     totalPrice: number
 }
