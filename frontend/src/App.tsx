@@ -1,8 +1,17 @@
+import { useEffect } from 'react'
+import { useEffect } from 'react'
 import { Routes, Route, NavLink } from 'react-router-dom'
 import { AppRoot } from '@telegram-apps/telegram-ui'
 import '@telegram-apps/telegram-ui/dist/styles.css'
 
 import { CartProvider, useCart } from './context/CartContext'
+
+// Сообщаем Telegram что приложение готово
+const tg = (window as any).Telegram?.WebApp
+if (tg) {
+    tg.ready()
+    tg.expand() // Разворачиваем на весь экран
+}
 import HomePage from './pages/HomePage'
 import CatalogPage from './pages/CatalogPage'
 import ProductPage from './pages/ProductPage'
@@ -11,6 +20,13 @@ import CartPage from './pages/CartPage'
 import CheckoutPage from './pages/CheckoutPage'
 import ReservationPage from './pages/ReservationPage'
 import AllProductsPage from './pages/AllProductsPage'
+
+// Инициализация Telegram WebApp
+const tg = (window as any).Telegram?.WebApp
+if (tg) {
+    tg.ready() // Сообщаем Telegram что приложение готово
+    tg.expand() // Разворачиваем на весь экран
+}
 
 function CartBadge() {
     const { totalItems } = useCart()
