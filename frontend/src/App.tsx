@@ -1,17 +1,8 @@
-import { useEffect } from 'react'
-import { useEffect } from 'react'
 import { Routes, Route, NavLink } from 'react-router-dom'
 import { AppRoot } from '@telegram-apps/telegram-ui'
 import '@telegram-apps/telegram-ui/dist/styles.css'
 
 import { CartProvider, useCart } from './context/CartContext'
-
-// Сообщаем Telegram что приложение готово
-const tg = (window as any).Telegram?.WebApp
-if (tg) {
-    tg.ready()
-    tg.expand() // Разворачиваем на весь экран
-}
 import HomePage from './pages/HomePage'
 import CatalogPage from './pages/CatalogPage'
 import ProductPage from './pages/ProductPage'
@@ -21,11 +12,11 @@ import CheckoutPage from './pages/CheckoutPage'
 import ReservationPage from './pages/ReservationPage'
 import AllProductsPage from './pages/AllProductsPage'
 
-// Инициализация Telegram WebApp
+// Инициализация Telegram WebApp — сразу при загрузке
 const tg = (window as any).Telegram?.WebApp
 if (tg) {
-    tg.ready() // Сообщаем Telegram что приложение готово
-    tg.expand() // Разворачиваем на весь экран
+    tg.ready()
+    tg.expand()
 }
 
 function CartBadge() {
@@ -49,7 +40,6 @@ function AppContent() {
                 <Route path="/reservation/:id" element={<ReservationPage />} />
             </Routes>
 
-            {/* Нижняя навигация — 4 вкладки */}
             <nav className="tab-bar">
                 <NavLink to="/" className={({ isActive }) => `tab-item ${isActive ? 'active' : ''}`}>
                     <span className="icon">🏠</span>
