@@ -1,11 +1,8 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Spinner } from '@telegram-apps/telegram-ui'
 import { getCategories } from '../api'
 import type { Category } from '../types'
-
-// Скриншоты для карусели
-const screenshots = Array.from({ length: 20 }, (_, i) => `/screenshots/${i + 1}.webp`)
 
 const icons: Record<string, string> = {
     'growth-hormones': '💉',
@@ -30,8 +27,6 @@ export default function HomePage() {
     const navigate = useNavigate()
     const [categories, setCategories] = useState<Category[]>([])
     const [loading, setLoading] = useState(true)
-    const [currentSlide, setCurrentSlide] = useState(0)
-    const carouselRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         async function loadData() {
@@ -164,70 +159,6 @@ export default function HomePage() {
                     border-radius: 1px;
                 }
 
-                /* Карусель скриншотов */
-                .home-page .carousel-section {
-                    padding: 24px 16px;
-                    margin-top: 16px;
-                }
-                .home-page .carousel-title {
-                    font-size: 14px;
-                    font-weight: 600;
-                    color: #e0f0ff;
-                    letter-spacing: 2px;
-                    text-transform: uppercase;
-                    text-align: center;
-                    margin-bottom: 16px;
-                }
-                .home-page .carousel {
-                    display: flex;
-                    gap: 12px;
-                    overflow-x: auto;
-                    scroll-snap-type: x mandatory;
-                    scrollbar-width: none;
-                    -ms-overflow-style: none;
-                    padding: 8px 0;
-                }
-                .home-page .carousel::-webkit-scrollbar {
-                    display: none;
-                }
-                .home-page .carousel-item {
-                    flex: 0 0 auto;
-                    width: 200px;
-                    scroll-snap-align: center;
-                    border-radius: 16px;
-                    overflow: hidden;
-                    border: 1px solid rgba(0, 212, 255, 0.2);
-                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-                    transition: transform 0.3s, box-shadow 0.3s;
-                }
-                .home-page .carousel-item:active {
-                    transform: scale(1.02);
-                    box-shadow: 0 12px 32px rgba(0, 212, 255, 0.2);
-                }
-                .home-page .carousel-item img {
-                    width: 100%;
-                    height: auto;
-                    display: block;
-                }
-                .home-page .carousel-dots {
-                    display: flex;
-                    justify-content: center;
-                    gap: 6px;
-                    margin-top: 12px;
-                }
-                .home-page .carousel-dot {
-                    width: 6px;
-                    height: 6px;
-                    border-radius: 50%;
-                    background: rgba(0, 212, 255, 0.3);
-                    transition: all 0.3s;
-                }
-                .home-page .carousel-dot.active {
-                    background: #00d4ff;
-                    width: 18px;
-                    border-radius: 3px;
-                }
-
             `}</style>
 
             <div className="content">
@@ -248,40 +179,6 @@ export default function HomePage() {
                             <div className="line" />
                         </div>
                     ))}
-                </div>
-
-                <div className="carousel-section">
-                    <div className="carousel-title">📱 Скриншоты приложения</div>
-                    <div
-                        className="carousel"
-                        ref={carouselRef}
-                        onScroll={(e) => {
-                            const el = e.currentTarget
-                            const slideWidth = 212 // 200px + 12px gap
-                            const newSlide = Math.round(el.scrollLeft / slideWidth)
-                            setCurrentSlide(Math.min(newSlide, screenshots.length - 1))
-                        }}
-                    >
-                        {screenshots.map((src, i) => (
-                            <div key={i} className="carousel-item">
-                                <img src={src} alt={`Скриншот ${i + 1}`} loading="lazy" />
-                            </div>
-                        ))}
-                    </div>
-                    <div className="carousel-dots">
-                        {screenshots.slice(0, 10).map((_, i) => (
-                            <div
-                                key={i}
-                                className={`carousel-dot ${currentSlide === i ? 'active' : ''}`}
-                                onClick={() => {
-                                    carouselRef.current?.scrollTo({
-                                        left: i * 212,
-                                        behavior: 'smooth'
-                                    })
-                                }}
-                            />
-                        ))}
-                    </div>
                 </div>
 
 
