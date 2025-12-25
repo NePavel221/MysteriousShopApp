@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import { login } from '../api'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
 interface Props {
-    onLogin: () => void
+    onLogin: (token: string) => void
 }
 
 export default function LoginPage({ onLogin }: Props) {
-    const [loginValue, setLoginValue] = useState('')
+    const [login, setLogin] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
@@ -17,12 +18,18 @@ export default function LoginPage({ onLogin }: Props) {
         setLoading(true)
 
         try {
-            const res = await login(loginValue, password)
-            if (res.token) {
-                localStorage.setItem('admin_token', res.token)
-                onLogin()
+            const res = await fetch(`${API_URL}/api/admin/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login, password })
+            })
+
+            const data = await res.json()
+
+            if (res.ok && data.token) {
+                onLogin(data.token)
             } else {
-                setError(res.error || 'Ошибка входа')
+                setError(data.error || 'Ошибка входа')
             }
         } catch {
             setError('Ошибка соединения с сервером')
@@ -33,30 +40,46 @@ export default function LoginPage({ onLogin }: Props) {
 
     return (
         <div className="login-page">
-            <form className="login-card" onSubmit={handleSubmit}>
-                <h1>🔐 VapeCity</h1>
-                <p>Вход в админ-панель</p>
+            <div className="login-card">
+                <div className="login-logo">
+                    <div className="icon">🔮</div>
+                    <h1>Mysterious Shop</h1>
+                    <p>Панель администратора</p>
+                </div>
 
                 {error && <div className="login-error">{error}</div>}
 
-                <input
-                    type="text"
-                    placeholder="Логин"
-                    value={loginValue}
-                    onChange={(e) => setLoginValue(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Пароль"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Вход...' : 'Войти'}
-                </button>
-            </form>
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label>Логин</label>
+                        <input
+                            type="text"
+                            value={login}
+                            onChange={e => setLogin(e.target.value)}
+                            placeholder="Введите логин"
+                            autoFocus
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Пароль</label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            placeholder="Введите пароль"
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="btn btn-primary login-btn"
+                        disabled={loading}
+                    >
+                        {loading ? '⏳ Вход...' : '🚀 Войти'}
+                    </button>
+                </form>
+            </div>
         </div>
     )
 }

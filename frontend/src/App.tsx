@@ -10,6 +10,7 @@ import ProfilePage from './pages/ProfilePage'
 import CartPage from './pages/CartPage'
 import CheckoutPage from './pages/CheckoutPage'
 import ReservationPage from './pages/ReservationPage'
+import AllProductsPage from './pages/AllProductsPage'
 
 function CartBadge() {
     const { totalItems } = useCart()
@@ -24,6 +25,7 @@ function AppContent() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/catalog" element={<CatalogPage />} />
                 <Route path="/catalog/:categorySlug" element={<CatalogPage />} />
+                <Route path="/products" element={<AllProductsPage />} />
                 <Route path="/product/:productId" element={<ProductPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/cart" element={<CartPage />} />
@@ -31,11 +33,15 @@ function AppContent() {
                 <Route path="/reservation/:id" element={<ReservationPage />} />
             </Routes>
 
-            {/* Нижняя навигация — 3 вкладки */}
+            {/* Нижняя навигация — 4 вкладки */}
             <nav className="tab-bar">
                 <NavLink to="/" className={({ isActive }) => `tab-item ${isActive ? 'active' : ''}`}>
                     <span className="icon">🏠</span>
                     <span>Главная</span>
+                </NavLink>
+                <NavLink to="/products" className={({ isActive }) => `tab-item ${isActive ? 'active' : ''}`}>
+                    <span className="icon">📦</span>
+                    <span>Товары</span>
                 </NavLink>
                 <NavLink to="/cart" className={({ isActive }) => `tab-item ${isActive ? 'active' : ''}`}>
                     <span className="icon">🛒</span>

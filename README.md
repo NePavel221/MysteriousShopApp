@@ -1,13 +1,13 @@
-# VapeCity Mini App
+# Mysterious Shop
 
-Telegram Mini App для сети вейп-шопов VapeCity (Пермь).
+Telegram Mini App для магазина Mysterious Shop.
 
 ## Функционал
 
 - 📦 Каталог товаров с категориями
 - 🔍 Поиск и фильтры
-- 📍 9 точек продаж
-- 💰 Демо бонусная программа
+- 🛒 Корзина и оформление заказов
+- 💰 Бонусная программа
 
 ## Технологии
 
@@ -34,7 +34,7 @@ npm run dev
 ## Структура
 
 ```
-VapeCityApp/
+MysteriousShopApp/
 ├── frontend/     # React приложение
 ├── backend/      # Express API + SQLite
 └── README.md

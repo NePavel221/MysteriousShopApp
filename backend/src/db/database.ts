@@ -10,7 +10,7 @@ const __dirname = dirname(__filename)
 const projectRoot = join(__dirname, '../..')
 
 // Путь к файлу базы данных
-const dbPath = join(projectRoot, 'data/vapecity.db')
+const dbPath = join(projectRoot, 'data/mysterious.db')
 
 // Путь к SQL файлам (всегда в src/db/)
 const sqlDir = join(projectRoot, 'src/db')

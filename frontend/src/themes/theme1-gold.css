@@ -1,0 +1,72 @@
+/* THEME 1: Mysterious Gold — Cyberpunk Neon */
+/* Grid карточки с неоновым свечением */
+
+.theme-1 .page-header h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #f0d000 0%, #ffa500 50%, #00d4ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 60px rgba(240, 208, 0, 0.5);
+}
+
+.theme-1 .category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 16px;
+}
+
+.theme-1 .category-card {
+    background: linear-gradient(180deg, rgba(240, 208, 0, 0.08) 0%, #13131f 100%);
+    border-radius: 16px;
+    padding: 24px 16px;
+    text-align: center;
+    border: 1px solid rgba(240, 208, 0, 0.2);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-1 .category-card:active {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 0 30px rgba(240, 208, 0, 0.4), 0 20px 40px rgba(0, 0, 0, 0.4);
+    border-color: #f0d000;
+}
+
+.theme-1 .category-card .icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 12px;
+}
+
+.theme-1 .category-card .icon svg {
+    filter: drop-shadow(0 0 8px currentColor);
+}
+
+.theme-1 .category-card .name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.theme-1 .product-card {
+    background: #13131f;
+    border-radius: 16px;
+    border: 1px solid rgba(240, 208, 0, 0.1);
+    overflow: hidden;
+}
+
+.theme-1 .product-card .price {
+    font-family: 'Orbitron', sans-serif;
+    color: #f0d000;
+    text-shadow: 0 0 10px rgba(240, 208, 0, 0.5);
+}
+
+.theme-1 .product-card .brand {
+    color: #00d4ff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 10px;
+}

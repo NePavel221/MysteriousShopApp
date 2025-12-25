@@ -6,7 +6,7 @@ import fs from 'fs'
 import { db } from '../db/database.js'
 
 const router = Router()
-const JWT_SECRET = 'vapecity-admin-secret-key'
+const JWT_SECRET = 'mysterious-shop-admin-secret-key'
 const ADMIN_LOGIN = '123'
 const ADMIN_PASSWORD = '123'
 
@@ -391,49 +391,67 @@ router.get('/categories', authMiddleware, (req, res) => {
     }
 })
 
+// POST /api/admin/categories — создание категории
+router.post('/categories', authMiddleware, (req, res) => {
+    try {
+        const { name, slug, icon, sort_order } = req.body
+        const result = db.prepare(`
+            INSERT INTO categories (name, slug, icon, sort_order)
+            VALUES (?, ?, ?, ?)
+        `).run(name, slug, icon || '📦', sort_order || 0)
+        res.json({ success: true, id: result.lastInsertRowid })
+    } catch (error) {
+        res.status(500).json({ error: 'Ошибка создания категории' })
+    }
+})
+
+// PUT /api/admin/categories/:id — обновление категории
+router.put('/categories/:id', authMiddleware, (req, res) => {
+    try {
+        const { id } = req.params
+        const { name, slug, icon, sort_order } = req.body
+        db.prepare(`
+            UPDATE categories SET name = ?, slug = ?, icon = ?, sort_order = ? WHERE id = ?
+        `).run(name, slug, icon, sort_order, id)
+        res.json({ success: true })
+    } catch (error) {
+        res.status(500).json({ error: 'Ошибка обновления категории' })
+    }
+})
+
+// DELETE /api/admin/categories/:id — удаление категории
+router.delete('/categories/:id', authMiddleware, (req, res) => {
+    try {
+        const { id } = req.params
+        db.prepare('UPDATE products SET category_id = NULL WHERE category_id = ?').run(id)
+        db.prepare('DELETE FROM categories WHERE id = ?').run(id)
+        res.json({ success: true })
+    } catch (error) {
+        res.status(500).json({ error: 'Ошибка удаления категории' })
+    }
+})
+
+// =====================
+// ЗАКАЗЫ
+// =====================
+
+// GET /api/admin/orders — все заказы
+router.get('/orders', authMiddleware, (req, res) => {
+    try {
+        const orders = db.prepare(`
+            SELECT r.*, u.first_name, u.last_name, u.telegram_id
+            FROM reservations r
+            JOIN users u ON r.user_id = u.id
+            ORDER BY r.created_at DESC
+        `).all()
+        res.json(orders)
+    } catch (error) {
+        res.status(500).json({ error: 'Ошибка получения заказов' })
+    }
+})
+
 // =====================
 // НАСТРОЙКИ
 // =====================
-
-// GET /api/admin/settings
-router.get('/settings', authMiddleware, async (req, res) => {
-    try {
-        const botToken = db.prepare("SELECT value FROM settings WHERE key = 'bot_token'").get() as any
-        const { isBotRunning } = await import('../bot/telegram-bot.js')
-        res.json({
-            bot_token: botToken?.value || '',
-            bot_running: isBotRunning()
-        })
-    } catch (error) {
-        res.status(500).json({ error: 'Ошибка получения настроек' })
-    }
-})
-
-// PUT /api/admin/settings
-router.put('/settings', authMiddleware, async (req, res) => {
-    try {
-        const { bot_token } = req.body
-
-        // Upsert bot_token
-        const existing = db.prepare("SELECT * FROM settings WHERE key = 'bot_token'").get()
-        if (existing) {
-            db.prepare("UPDATE settings SET value = ? WHERE key = 'bot_token'").run(bot_token)
-        } else {
-            db.prepare("INSERT INTO settings (key, value) VALUES ('bot_token', ?)").run(bot_token)
-        }
-
-        // Динамически перезапускаем бота с новым токеном
-        const { startBot } = await import('../bot/telegram-bot.js')
-        const botStarted = startBot(bot_token)
-
-        res.json({
-            success: true,
-            bot_running: botStarted,
-            message: botStarted ? 'Токен сохранён, бот перезапущен!' : 'Токен сохранён, но бот не запустился (проверьте токен)'
-        })
-    } catch (error) {
-        res.status(500).json({ error: 'Ошибка сохранения настроек' })
-    }
-})
 
 export default router

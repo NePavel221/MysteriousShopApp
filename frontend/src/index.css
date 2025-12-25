@@ -1,4 +1,4 @@
-/* VapeCity — Cyberpunk Neon Theme */
+/* Mysterious Shop — Dark Gold Pharma Theme */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;500;600;700&display=swap');
 
 /* ========================================= */
@@ -23,14 +23,14 @@ body,
     --tgui--secondary_bg_color: #0d0d14 !important;
     --tgui--text_color: #ffffff !important;
     --tgui--hint_color: #8888aa !important;
-    --tgui--link_color: #ff2d95 !important;
-    --tgui--button_color: #ff2d95 !important;
-    --tgui--button_text_color: #ffffff !important;
+    --tgui--link_color: #f0d000 !important;
+    --tgui--button_color: #f0d000 !important;
+    --tgui--button_text_color: #0a0a0a !important;
     --tgui--header_bg_color: #0d0d14 !important;
     --tgui--section_bg_color: #13131f !important;
     --tgui--section_header_text_color: #8888aa !important;
     --tgui--subtitle_text_color: #8888aa !important;
-    --tgui--destructive_text_color: #ff2d95 !important;
+    --tgui--destructive_text_color: #f0d000 !important;
 }
 
 :root {
@@ -40,23 +40,23 @@ body,
     --vc-card: #13131f;
     --vc-card-hover: #1a1a2e;
 
-    /* Неоновые акценты */
-    --vc-neon-magenta: #ff2d95;
-    --vc-neon-cyan: #00f0ff;
-    --vc-neon-purple: #b026ff;
+    /* Неоновые акценты — Gold & Cyan */
+    --vc-neon-magenta: #f0d000;
+    --vc-neon-cyan: #00d4ff;
+    --vc-neon-purple: #f0d000;
     --vc-neon-green: #39ff14;
 
-    /* Градиенты */
-    --vc-gradient-main: linear-gradient(135deg, #ff2d95 0%, #b026ff 50%, #00f0ff 100%);
-    --vc-gradient-card: linear-gradient(180deg, rgba(255, 45, 149, 0.08) 0%, transparent 100%);
+    /* Градиенты — Gold theme */
+    --vc-gradient-main: linear-gradient(135deg, #f0d000 0%, #ffa500 50%, #00d4ff 100%);
+    --vc-gradient-card: linear-gradient(180deg, rgba(240, 208, 0, 0.08) 0%, transparent 100%);
 
     /* Текст */
     --vc-text: #ffffff;
     --vc-text-dim: #8888aa;
 
-    /* Свечение */
-    --vc-glow-magenta: 0 0 20px rgba(255, 45, 149, 0.6), 0 0 40px rgba(255, 45, 149, 0.3);
-    --vc-glow-cyan: 0 0 20px rgba(0, 240, 255, 0.6), 0 0 40px rgba(0, 240, 255, 0.3);
+    /* Свечение — Gold */
+    --vc-glow-magenta: 0 0 20px rgba(240, 208, 0, 0.6), 0 0 40px rgba(240, 208, 0, 0.3);
+    --vc-glow-cyan: 0 0 20px rgba(0, 212, 255, 0.6), 0 0 40px rgba(0, 212, 255, 0.3);
 }
 
 * {
@@ -73,7 +73,7 @@ body {
     overflow-x: hidden;
 }
 
-/* Фоновый паттерн */
+/* Фоновый паттерн — Gold accents */
 body::before {
     content: '';
     position: fixed;
@@ -82,8 +82,8 @@ body::before {
     right: 0;
     bottom: 0;
     background:
-        radial-gradient(ellipse at 20% 0%, rgba(176, 38, 255, 0.15) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 100%, rgba(255, 45, 149, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 20% 0%, rgba(240, 208, 0, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 100%, rgba(0, 212, 255, 0.08) 0%, transparent 50%),
         repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(255, 255, 255, 0.01) 50px, rgba(255, 255, 255, 0.01) 51px);
     pointer-events: none;
     z-index: -1;
@@ -131,10 +131,12 @@ body::before {
     0%,
     100% {
         filter: brightness(1);
+        text-shadow: 0 0 60px rgba(240, 208, 0, 0.5);
     }
 
     50% {
         filter: brightness(1.2);
+        text-shadow: 0 0 80px rgba(240, 208, 0, 0.8);
     }
 }
 
@@ -2168,4 +2170,101 @@ body::before {
     font-size: 13px;
     margin-bottom: 12px;
     text-align: center;
+}
+
+
+/* ==================== */
+/* THEME SWITCHER       */
+/* ==================== */
+
+.theme-switcher {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 6px;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    padding: 6px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.theme-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    color: #000;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-btn:hover {
+    transform: scale(1.1);
+}
+
+.theme-btn.active {
+    border-color: #fff;
+    box-shadow: 0 0 10px currentColor;
+}
+
+/* ==================== */
+/* DYNAMIC THEME VARS   */
+/* ==================== */
+
+:root {
+    --theme-primary: #f0d000;
+    --theme-secondary: #00d4ff;
+    --theme-accent: #ffa500;
+    --theme-background: #050508;
+    --theme-card: #13131f;
+    --theme-text: #ffffff;
+    --theme-text-dim: #8888aa;
+    --theme-font: 'Orbitron';
+}
+
+/* Override hardcoded colors with theme vars */
+.page-header h1 {
+    background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-accent) 50%, var(--theme-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.category-card:hover,
+.category-card:active {
+    border-color: rgba(var(--theme-primary), 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px var(--theme-primary);
+}
+
+.product-card .price {
+    color: var(--theme-primary);
+}
+
+.product-card .brand {
+    color: var(--theme-secondary);
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, var(--theme-primary), var(--theme-secondary));
+}
+
+.neon-button {
+    background: linear-gradient(135deg, var(--theme-primary), var(--theme-accent));
+    box-shadow: 0 4px 15px rgba(var(--theme-primary), 0.4);
+}
+
+.tab-item.active {
+    color: var(--theme-primary);
+}
+
+.bonus-card {
+    background: linear-gradient(135deg, var(--theme-primary), var(--theme-accent), var(--theme-secondary));
 }

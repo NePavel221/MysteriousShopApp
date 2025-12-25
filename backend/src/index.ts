@@ -11,6 +11,7 @@ import productsRouter from './routes/products.js'
 import usersRouter from './routes/users.js'
 import adminRouter from './routes/admin.js'
 import reservationsRouter from './routes/reservations.js'
+import imageGenRouter from './routes/imageGen.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -31,16 +32,9 @@ if (!existsSync(dataDir)) {
 // Инициализируем базу данных ПЕРВЫМ ДЕЛОМ
 initDatabase()
 
-// Запускаем все три Telegram-бота (после инициализации БД)
-Promise.all([
-    import('./bot/telegram-bot.js'),
-    import('./bot/main-bot.js'),
-    import('./bot/admin-bot.js')
-]).then(([sellerBot, mainBot, adminBot]) => {
-    sellerBot.startBot()      // Бот для продавцов
-    mainBot.startMainBot()    // Основной бот для клиентов
-    adminBot.startAdminBot()  // Бот админки
-    console.log('🤖 Все боты запущены!')
+// Запускаем Telegram-бот (после инициализации БД)
+import('./bot/bot.js').then((bot) => {
+    bot.startBot()
 })
 
 // Автоотмена старых броней (запускается каждый час)
@@ -76,6 +70,7 @@ app.use('/api/products', productsRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/admin', adminRouter)
 app.use('/api/reservations', reservationsRouter)
+app.use('/api/image', imageGenRouter)
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -96,7 +91,7 @@ if (process.env.NODE_ENV === 'production') {
 // Запуск сервера
 app.listen(PORT, () => {
     console.log(`
-🚀 VapeCity API запущен!
+🚀 Mysterious Shop API запущен!
 📍 http://localhost:${PORT}
 📦 API: http://localhost:${PORT}/api
 

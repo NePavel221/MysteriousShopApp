@@ -1,5 +1,5 @@
 {
-    "name": "vapecity-backend",
+    "name": "mysterious-shop-backend",
     "version": "1.0.0",
     "type": "module",
     "scripts": {
@@ -16,7 +16,8 @@
         "express": "^4.21.1",
         "jsonwebtoken": "^9.0.3",
         "multer": "^2.0.2",
-        "node-telegram-bot-api": "^0.66.0"
+        "node-telegram-bot-api": "^0.66.0",
+        "sharp": "^0.34.5"
     },
     "devDependencies": {
         "@types/better-sqlite3": "^7.6.11",

@@ -1,72 +1,86 @@
 import { useState, useEffect } from 'react'
-import { checkAuth } from './api'
 import LoginPage from './pages/LoginPage'
-import Dashboard from './pages/Dashboard'
 import ProductsPage from './pages/ProductsPage'
-import StoresPage from './pages/StoresPage'
-import InventoryPage from './pages/InventoryPage'
-import './App.css'
+import CategoriesPage from './pages/CategoriesPage'
+import OrdersPage from './pages/OrdersPage'
 
-type Page = 'dashboard' | 'products' | 'stores' | 'inventory'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+
+type Page = 'products' | 'categories' | 'orders'
 
 function App() {
-    const [isAuth, setIsAuth] = useState<boolean | null>(null)
-    const [currentPage, setCurrentPage] = useState<Page>('dashboard')
+    const [token, setToken] = useState<string | null>(localStorage.getItem('admin_token'))
+    const [page, setPage] = useState<Page>('orders')
 
     useEffect(() => {
-        const token = localStorage.getItem('admin_token')
-        if (!token) {
-            setIsAuth(false)
-            return
+        if (token) {
+            fetch(`${API_URL}/api/admin/check`, {
+                headers: { Authorization: `Bearer ${token}` }
+            }).then(res => {
+                if (!res.ok) {
+                    setToken(null)
+                    localStorage.removeItem('admin_token')
+                }
+            })
         }
-        checkAuth()
-            .then(() => setIsAuth(true))
-            .catch(() => setIsAuth(false))
-    }, [])
+    }, [token])
 
-    if (isAuth === null) {
-        return <div className="loading">Загрузка...</div>
-    }
-
-    if (!isAuth) {
-        return <LoginPage onLogin={() => setIsAuth(true)} />
+    const handleLogin = (newToken: string) => {
+        setToken(newToken)
+        localStorage.setItem('admin_token', newToken)
     }
 
     const handleLogout = () => {
+        setToken(null)
         localStorage.removeItem('admin_token')
-        setIsAuth(false)
+    }
+
+    if (!token) {
+        return <LoginPage onLogin={handleLogin} />
     }
 
     return (
-        <div className="admin-app">
+        <div className="app">
             <nav className="sidebar">
                 <div className="logo">
-                    <h2>VapeCity</h2>
-                    <span>Админ-панель</span>
+                    <span className="logo-icon">🔮</span>
+                    <span className="logo-text">Mysterious</span>
                 </div>
-                <ul className="nav-menu">
-                    <li className={currentPage === 'dashboard' ? 'active' : ''} onClick={() => setCurrentPage('dashboard')}>
-                        📊 Дашборд
-                    </li>
-                    <li className={currentPage === 'products' ? 'active' : ''} onClick={() => setCurrentPage('products')}>
-                        📦 Товары
-                    </li>
-                    <li className={currentPage === 'stores' ? 'active' : ''} onClick={() => setCurrentPage('stores')}>
-                        🏪 Магазины
-                    </li>
-                    <li className={currentPage === 'inventory' ? 'active' : ''} onClick={() => setCurrentPage('inventory')}>
-                        📋 Наличие
-                    </li>
-                </ul>
+
+                <div className="nav-items">
+                    <button
+                        className={`nav-item ${page === 'orders' ? 'active' : ''}`}
+                        onClick={() => setPage('orders')}
+                    >
+                        <span className="nav-icon">📋</span>
+                        <span>Заказы</span>
+                    </button>
+                    <button
+                        className={`nav-item ${page === 'products' ? 'active' : ''}`}
+                        onClick={() => setPage('products')}
+                    >
+                        <span className="nav-icon">📦</span>
+                        <span>Товары</span>
+                    </button>
+                    <button
+                        className={`nav-item ${page === 'categories' ? 'active' : ''}`}
+                        onClick={() => setPage('categories')}
+                    >
+                        <span className="nav-icon">📁</span>
+                        <span>Категории</span>
+                    </button>
+                </div>
+
                 <button className="logout-btn" onClick={handleLogout}>
-                    🚪 Выйти
+                    <span>🚪</span>
+                    <span>Выйти</span>
                 </button>
             </nav>
+
             <main className="content">
-                {currentPage === 'dashboard' && <Dashboard />}
-                {currentPage === 'products' && <ProductsPage />}
-                {currentPage === 'stores' && <StoresPage />}
-                {currentPage === 'inventory' && <InventoryPage />}
+                {page === 'orders' && <OrdersPage token={token} />}
+                {page === 'products' && <ProductsPage token={token} />}
+                {page === 'categories' && <CategoriesPage token={token} />}
             </main>
         </div>
     )

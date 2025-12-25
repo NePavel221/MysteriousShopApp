@@ -33,7 +33,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     // Загрузка из localStorage
     useEffect(() => {
-        const saved = localStorage.getItem('vapecity_cart')
+        const saved = localStorage.getItem('mysterious_shop_cart')
         if (saved) {
             try {
                 const data = JSON.parse(saved)
@@ -49,7 +49,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     // Сохранение в localStorage
     useEffect(() => {
-        localStorage.setItem('vapecity_cart', JSON.stringify({
+        localStorage.setItem('mysterious_shop_cart', JSON.stringify({
             items, storeId, storeName, storeAddress
         }))
     }, [items, storeId, storeName, storeAddress])
